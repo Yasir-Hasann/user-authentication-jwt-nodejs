@@ -1,7 +1,7 @@
 {
   "name": "user-authentication-jwt",
   "version": "1.0.0",
-  "description": "User authentication with JWT and email verification via OTP",
+  "description": "User authentication with JWT",
   "main": "./src/server.js",
   "scripts": {
     "start": "node ./src/server.js",

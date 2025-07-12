@@ -12,6 +12,7 @@ const transporter = nodemailer.createTransport({
 });
 
 class NodeMailer {
+  static instance = null;
   constructor() {
     this.transporter = transporter;
   }
@@ -41,6 +42,13 @@ class NodeMailer {
 
     await this.sendEmail(email, html, 'Verify Account');
   }
+
+  static getInstance() {
+    if (!NodeMailer.instance) {
+      NodeMailer.instance = new NodeMailer();
+    }
+    return NodeMailer.instance;
+  }
 }
 
-module.exports = NodeMailer;
+module.exports = NodeMailer.getInstance();

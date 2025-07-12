@@ -7,11 +7,11 @@ const UserSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    password: { type: String, select: false },
+    password: { type: String, required: true, select: false },
     isBlocked: { type: Boolean, default: false },
     isEmailVerified: { type: Boolean, default: false },
     verificationCode: String,
-    otpLastSentTime: Number ,
+    otpLastSentTime: Number,
     verificationToken: String,
     linkLastSentTime: Number,
   },
@@ -34,7 +34,7 @@ UserSchema.methods.setPassword = async function (newPass) {
   return pass;
 };
 
-UserSchema.methods.getSignedjwtToken = function () {
+UserSchema.methods.getSignedJwtToken = function () {
   return jwt.sign({ _id: this._id, type: 'user' }, process.env.JWT_SECRET);
 };
 

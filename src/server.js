@@ -1,6 +1,6 @@
 // module imports
-const cors = require('cors');
 require('dotenv').config();
+const cors = require('cors');
 const express = require('express');
 const morgan = require('morgan');
 const path = require('path');
@@ -18,10 +18,10 @@ const port = process.env.PORT || 5001;
 connectDB();
 
 // middlewares
-app.use('/public/', express.static(path.join('public')));
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
 app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use('/public/', express.static(path.join('public')));
 app.use(morgan('dev'));
 
 // mount routes
