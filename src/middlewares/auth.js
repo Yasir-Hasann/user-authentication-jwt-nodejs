@@ -6,7 +6,7 @@ const asyncHandler = require('express-async-handler');
 const UserModel = require('../models/user');
 
 exports.verifyToken = asyncHandler(async (req, res, next) => {
-  const token = (req.headers.authorization && req.headers.authorization.split('Bearer')[1]) || (req.signedCookies && req.signedCookies.jwt) || (req.cookies && req.cookies.jwt);
+  const token = (req.headers.authorization && req.headers.authorization.split('Bearer ')[1]) || (req.signedCookies && req.signedCookies.jwt) || (req.cookies && req.cookies.jwt);
   if (!token) return res.status(401).send('Unauthorized: No token provided');
 
   try {
@@ -26,7 +26,7 @@ exports.verifyToken = asyncHandler(async (req, res, next) => {
 });
 
 exports.verifyOptionalToken = asyncHandler(async (req, res, next) => {
-  const token = (req.headers.authorization && req.headers.authorization.split('Bearer')[1]) || (req.signedCookies && req.signedCookies.jwt) || (req.cookies && req.cookies.jwt);
+  const token = (req.headers.authorization && req.headers.authorization.split('Bearer ')[1]) || (req.signedCookies && req.signedCookies.jwt) || (req.cookies && req.cookies.jwt);
 
   if (token) {
     try {
@@ -39,9 +39,9 @@ exports.verifyOptionalToken = asyncHandler(async (req, res, next) => {
 
       // Attach user to the request object
       req.user = user;
-      next();
     } catch (error) {
       return res.status(401).send('Unauthorized: Invalid token');
     }
   }
+  next();
 });

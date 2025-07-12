@@ -89,7 +89,7 @@ exports.resendOTP = asyncHandler(async (req, res, next) => {
   }
 
   const otp = generateOTP();
-  await nodeMailer().sendOTP(user.email, otp);
+  await nodeMailer.sendOTP(user.email, otp);
 
   await UserModel.findByIdAndUpdate(user._id, { verificationCode: otp, otpLastSentTime: dayjs().valueOf() });
   res.status(200).json({ success: true, message: 'Verification code is re-sent!' });
@@ -194,7 +194,7 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
   const { oldPassword, newPassword } = req.body;
   if (!oldPassword || !newPassword) return next(new ErrorResponse('field `oldPassword`, `newPassword` is required', 400));
 
-  const user = await UserModel.findById(user._id).select('+password');
+  const user = await UserModel.findById(req.user._id).select('+password');
   if (!user) return next(new ErrorResponse("Password couldn't be updated at this moment", 500));
 
   const isMatch = await user.matchPasswords(oldPassword);

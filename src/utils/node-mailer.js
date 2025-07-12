@@ -22,6 +22,7 @@ class NodeMailer {
       await this.transporter.sendMail({ from: process.env.SMTP_EMAIL, to: email, html, subject });
     } catch (error) {
       console.error('Error sending email:', error);
+      throw error;
     }
   }
 
