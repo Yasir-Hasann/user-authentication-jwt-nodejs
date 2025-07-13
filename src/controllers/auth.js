@@ -32,7 +32,7 @@ exports.login = asyncHandler(async (req, res, next) => {
 // @route  POST /api/v1/auth/register-with-otp
 // @access Public
 exports.registerWithOTP = asyncHandler(async (req, res, next) => {
-  const { name, email, password, isMobile = false } = req.body;
+  const { name, email, password } = req.body;
   if (!name || !email || !password) return next(new ErrorResponse('Please provide a name, email and password', 400));
 
   const userExists = await UserModel.findOne({ email });
@@ -45,11 +45,6 @@ exports.registerWithOTP = asyncHandler(async (req, res, next) => {
   await UserModel.findByIdAndUpdate(user._id, { verificationCode: otp, otpLastSentTime: dayjs().valueOf() });
 
   await nodeMailer.sendOTP(email, otp);
-  if (isMobile) {
-    const token = user.getSignedJwtToken();
-    return res.status(200).json({ success: true, token, message: 'Verification code is sent on email!' });
-  }
-
   res.status(200).json({ success: true, message: 'Verification code is sent on email!' });
 });
 
@@ -72,21 +67,13 @@ exports.sendOTP = asyncHandler(async (req, res, next) => {
 
 // @desc   Resend OTP
 // @route  POST /api/v1/auth/resend-otp
-// @access Public/Private
+// @access Public
 exports.resendOTP = asyncHandler(async (req, res, next) => {
-  const { isMobile = false } = req.body;
+  const { email } = req.body;
+  if (!email) return next(new ErrorResponse('Email is required!', 400));
 
-  let user = null;
-  if (isMobile) {
-    user = req.user;
-    if (!user) return next(new ErrorResponse('No user found!', 404));
-  } else {
-    const { email } = req.body;
-    if (!email) return next(new ErrorResponse('Email is required!', 400));
-
-    user = await UserModel.findOne({ email });
-    if (!user) return next(new ErrorResponse(`No user found with email ${email}`, 404));
-  }
+  const user = await UserModel.findOne({ email });
+  if (!user) return next(new ErrorResponse(`No user found with email ${email}`, 404));
 
   const otp = generateOTP();
   await nodeMailer.sendOTP(user.email, otp);
@@ -97,26 +84,17 @@ exports.resendOTP = asyncHandler(async (req, res, next) => {
 
 // @desc   Verify OTP
 // @route  POST /api/v1/auth/verify-otp
-// @access Public/Private
+// @access Public
 exports.verifyOTP = asyncHandler(async (req, res, next) => {
-  const { code, isMobile = false } = req.body;
+  const { code } = req.body;
   if (!code) return next(new ErrorResponse('Code is required!', 400));
 
-  if (isMobile) {
-    const { _id, verificationCode, otpLastSentTime } = req.user;
-    if (dayjs().diff(dayjs(otpLastSentTime)) > 500000 || verificationCode == null || otpLastSentTime == null) return next(new ErrorResponse('OTP is expired or used already!', 400));
-    if (code !== verificationCode) return next(new ErrorResponse('OTP is incorrect!', 400));
-    await UserModel.findByIdAndUpdate(_id, { verificationCode: null, otpLastSentTime: null, isEmailVerified: true });
-    return res.status(200).json({ success: true, message: 'OTP verified successfully!' });
-  } else {
-    const user = await UserModel.findOne({ verificationCode: code });
-    if (!user) return next(new ErrorResponse('OTP is incorrect!', 400));
+  const user = await UserModel.findOne({ verificationCode: code });
+  if (!user) return next(new ErrorResponse('OTP is incorrect!', 400));
 
-    const { _id, verificationCode, otpLastSentTime } = user;
-    if (dayjs().diff(dayjs(otpLastSentTime)) > 500000 || verificationCode == null || otpLastSentTime == null) return next(new ErrorResponse('OTP is expired or used already!', 400));
-    await UserModel.findByIdAndUpdate(_id, { verificationCode: null, otpLastSentTime: null, isEmailVerified: true });
-    return res.redirect('/email-verified.html');
-  }
+  if (dayjs().diff(dayjs(otpLastSentTime)) > 500000 || verificationCode == null || otpLastSentTime == null) return next(new ErrorResponse('OTP is expired or used already!', 400));
+  await UserModel.findByIdAndUpdate(_id, { verificationCode: null, otpLastSentTime: null, isEmailVerified: true });
+  return res.redirect('/email-verified.html');
 });
 
 // @desc   Register User With Verification Link
