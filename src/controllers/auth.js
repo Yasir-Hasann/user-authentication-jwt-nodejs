@@ -92,7 +92,8 @@ exports.verifyOTP = asyncHandler(async (req, res, next) => {
   const user = await UserModel.findOne({ verificationCode: code });
   if (!user) return next(new ErrorResponse('OTP is incorrect!', 400));
 
-  if (dayjs().diff(dayjs(otpLastSentTime)) > 500000 || verificationCode == null || otpLastSentTime == null) return next(new ErrorResponse('OTP is expired or used already!', 400));
+  const { _id, verificationCode, otpLastSentTime } = user;
+  if (dayjs().diff(dayjs()) > 500000 || verificationCode == null || otpLastSentTime == null) return next(new ErrorResponse('OTP is expired or used already!', 400));
   await UserModel.findByIdAndUpdate(_id, { verificationCode: null, otpLastSentTime: null, isEmailVerified: true });
   return res.redirect('/email-verified.html');
 });
