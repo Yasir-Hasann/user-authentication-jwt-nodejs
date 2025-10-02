@@ -95,7 +95,7 @@ exports.verifyOTP = asyncHandler(async (req, res, next) => {
   const { _id, verificationCode, otpLastSentTime } = user;
   if (dayjs().diff(dayjs()) > 500000 || verificationCode == null || otpLastSentTime == null) return next(new ErrorResponse('OTP is expired or used already!', 400));
   await UserModel.findByIdAndUpdate(_id, { verificationCode: null, otpLastSentTime: null, isEmailVerified: true });
-  return res.redirect('/email-verified.html');
+  res.status(200).json({ success: true, message: 'Account verified successfully!', isEmailVerified: true });
 });
 
 // @desc   Register User With Verification Link
@@ -163,7 +163,7 @@ exports.verifyLink = asyncHandler(async (req, res, next) => {
   if (!user) return next(new ErrorResponse('Invalid token!', 400));
 
   await UserModel.findByIdAndUpdate(user._id, { $set: { verificationToken: null, linkLastSentTime: null, isEmailVerified: true } });
-  res.redirect('/email-verified.html');
+  res.status(200).json({ success: true, message: 'Account verified successfully!', isEmailVerified: true });
 });
 
 // @desc   Change Password
