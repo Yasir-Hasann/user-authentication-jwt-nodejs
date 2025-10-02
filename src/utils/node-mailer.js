@@ -35,7 +35,7 @@ class NodeMailer {
   }
 
   async sendVerificationLink(email, verificationToken) {
-    const verificationLink = `${process.env.BASE_URL}auth/verify-link?token=${verificationToken}`;
+    const verificationLink = `${process.env.CLIENT_URL}account-verification?token=${verificationToken}`;
     const html = `<div style="font-family: 'Arial', sans-serif; background-color: #f4f4f4; padding: 20px; border-radius: 8px;">
               <p style="font-size: 16px; color: #333;">Click the following link to verify your email:</p>
               <a href="${verificationLink}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: #fff; text-decoration: none; border-radius: 4px;">Verify Now</a>
